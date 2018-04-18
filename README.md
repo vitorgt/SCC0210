@@ -1,5 +1,5 @@
 # Advanced Algorithms
-SCC0210
+[SCC0210](https://uspdigital.usp.br/jupiterweb/obterDisciplina?sgldis=SCC0210)
 
 Institute of Mathematical and Computer Sciences
 
