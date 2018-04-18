@@ -1,5 +1,5 @@
-# SCC0210
-Advanced Algorithms
+# Advanced Algorithms
+SCC0210
 
 Institute of Mathematical and Computer Sciences
 
