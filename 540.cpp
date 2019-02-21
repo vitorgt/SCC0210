@@ -38,27 +38,6 @@ int main(){
 		}
 	}
 
-
-	for(int i = 1; i < (int)in.length(); i++){
-		if(check.back() == '('){
-			if(in[i] == '('){
-				check.push_back('(');
-			}
-			else {
-				check.pop_back();
-			}
-		}
-		else{
-			check.push_back(in[i]);
-		}
-	}
-	if(check.empty()){
-		cout << "YES\n";
-	}
-	else{
-		cout << "NO\n";
-	}
-
 	return 0;
 
 }
