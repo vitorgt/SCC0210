@@ -21,25 +21,16 @@ int main(){
 	cin >> in;
 	int init = 0;
 	for(int i = 0; i < n-1; i++){
-		if(in[i] == '1' && in[i+1] == '0'){
+		if((in[i] == '1' && in[i+1] == '0') || (in[i] == '1' && i+1 == n-1)){
 			//end of sortable vector
 			vector<int> isit(&ori[init], &ori[i+2]);
 			sort(isit.begin(), isit.end());
 			for(int j = 0, k = init; j < isit.size(); j++, k++){
-				cout << "isit" << isit[j] << " k" << k << endl;
 				if(isit[j] != k){
 					cout << "NO" << endl;
-					//return 0;
+					return 0;
 				}
 			}
-			for(int j = 0; j < isit.size(); j++){
-				cout << isit[j];
-			}
-			cout << endl;
-			for(int j = 0; j < ori.size(); j++){
-				cout << ori[j];
-			}
-			cout << endl;
 		}
 		else if(in[i] == '0' && in[i+1] == '1'){
 			//begin of sortable vector
