@@ -25,18 +25,33 @@ int main(){
 				pq.push(res);
 			}
 			else if(op == 2){
-				if(stB && res != st.top()){
+				if(!st.empty()){
+					if(stB && res != st.top()){
+						stB = 0;
+					}
+					st.pop();
+				}
+				else{
 					stB = 0;
 				}
-				if(quB && res != qu.front()){
+				if(!qu.empty()){
+					if(quB && res != qu.front()){
+						quB = 0;
+					}
+					qu.pop();
+				}
+				else{
 					quB = 0;
 				}
-				if(pquB && res != pq.top()){
+				if(!pq.empty()){
+					if(pquB && res != pq.top()){
+						pquB = 0;
+					}
+					pq.pop();
+				}
+				else{
 					pquB = 0;
 				}
-				st.pop();
-				qu.pop();
-				pq.pop();
 			}
 		}
 		if(((int)stB + (int)quB + (int)pquB) > 1)
