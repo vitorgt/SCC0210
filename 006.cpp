@@ -15,7 +15,7 @@ struct node{
 	}
 
 	bool operator<(const node &v) const{
-		return size > v.size;
+		return size < v.size;
 	}
 };
 
@@ -24,7 +24,7 @@ int main(){
 	int n = 0, m = 0, k = 0, buffer = 0, sum = 0;
 	cin >> n >> m >> k;
 	vector<node> adr;
-	priority_queue<node *> open;
+	priority_queue<node> open;
 	for(int i = 0; i < n; i++){
 		cin >> buffer;
 		node in;
@@ -43,17 +43,17 @@ int main(){
 	}
 	for(int i = 0; i < m; i++){
 		cin >> buffer;
-		open.push(&adr[buffer-1]);
+		open.push(adr[buffer-1]);
 	}
 	while(!open.empty() && k--){
-		node *pack = open.top();
+		node pack = open.top();
 		open.pop();
-		if(pack->hasGift()){
+		if(pack.hasGift()){
 			sum++;
 		}
 		else{
-			for(auto i : pack->content){
-				open.push(i);
+			for(auto i : pack.content){
+				open.push(*i);
 			}
 		}
 	}
