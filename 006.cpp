@@ -8,7 +8,7 @@ using namespace std;
 
 struct node{
 	int id, size;
-	priority_queue<node *> content;
+	vector<node *> content;
 
 	bool hasGift(){
 		return content.empty();
@@ -21,10 +21,10 @@ struct node{
 
 int main(){
 	ios::sync_with_stdio(false);
-	int n = 0, m = 0, k = 0, buffer = 0;
+	int n = 0, m = 0, k = 0, buffer = 0, sum = 0;
 	cin >> n >> m >> k;
 	vector<node> adr;
-	priority_queue<node *> root;
+	priority_queue<node *> open;
 	for(int i = 0; i < n; i++){
 		cin >> buffer;
 		node in;
@@ -37,24 +37,26 @@ int main(){
 		if(buffer != 0){
 			for(int j = buffer; j > 0; j--){
 				cin >> buffer;
-				adr[i].content.push(&adr[buffer-1]);
+				adr[i].content.push_back(&adr[buffer-1]);
 			}
 		}
-	}
-	for(int i = 0; i < n; i++){
-		cout << adr[i].id << ":" << adr[i].size;
-		if(!adr[i].hasGift()){
-			cout << "(";
-			for(auto j : adr[i].content){
-				cout << j->id << ":" << j->size << " ";
-			}
-			cout << ")";
-		}
-		cout << endl;
 	}
 	for(int i = 0; i < m; i++){
 		cin >> buffer;
-		root.push(&adr[buffer-1]);
+		open.push(&adr[buffer-1]);
 	}
+	while(!open.empty() && k--){
+		node *pack = open.top();
+		open.pop();
+		if(pack->hasGift()){
+			sum++;
+		}
+		else{
+			for(auto i : pack->content){
+				open.push(i);
+			}
+		}
+	}
+	cout << sum << endl;
 	return 0;
 }
