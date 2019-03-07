@@ -24,15 +24,16 @@ void primer(){
 }
 
 void primeRing(int i, int n, vector<int> ring){
-	if(i == n-1){
+	if(i == n){
 		for(auto j : ring)
 			cout << j << " ";
 		cout << endl;
 		return;
 	}
-	for(int j = (i%2)+1; j < n; j += 2){
+	for(int j = (i%2)+1; j <= n; j += 2){
 		ring.push_back(j);
 		primeRing(i+1, n, ring);
+		ring.pop_back();
 	}
 }
 
