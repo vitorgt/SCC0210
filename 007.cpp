@@ -23,17 +23,24 @@ void primer(){
 	}
 }
 
-void primeRing(int i, int n, vector<int> ring){
+void primeRing(int i, int n, vector<int> &ring, vector<bool> &used){
 	if(i == n){
+		for(int j = 0; j < n; j++)
+			if(!primes[ring[j] + ring[(j+1)%n]])
+				return;
 		for(auto j : ring)
 			cout << j << " ";
 		cout << endl;
 		return;
 	}
-	for(int j = (i%2)+1; j <= n; j += 2){
-		ring.push_back(j);
-		primeRing(i+1, n, ring);
-		ring.pop_back();
+	for(int j = ((i%2) ? 2 : 3); j <= n; j += 2){
+		if(!used[j]){
+			used[j] = 1;
+			ring.push_back(j);
+			primeRing(i+1, n, ring, used);
+			ring.pop_back();
+			used[j] = 0;
+		}
 	}
 }
 
@@ -44,8 +51,9 @@ int main(){
 	while(cin >> in){
 		cout << "Case " << cases << ":" << endl;
 		vector<int> ring;
+		vector<bool> used(in, 0);
 		ring.push_back(1);
-		primeRing(1, in, ring);
+		primeRing(1, in, ring, used);
 		cout << endl;
 	}
 	return 0;
