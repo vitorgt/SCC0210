@@ -1,7 +1,6 @@
 #include<iostream>
 #include<vector>
 #include<queue>
-#include<string>
 
 using namespace std;
 #define inf 0x3f3f3f3f
@@ -23,14 +22,7 @@ struct state{
 		digit(vector<char>(4, 0)), depth(0), f(0) {}
 };
 
-void printS(const state &a){
-	cout << "digits: ";
-	for(auto &e : a.digit)
-		cout << e << " ";
-	cout << "depth: " << a.depth << " f: " << a.f << endl;
-}
-
-char moves [8][4]= {
+char moves[8][4] = {
 	{-1, 0, 0, 0},
 	{ 1, 0, 0, 0},
 	{ 0,-1, 0, 0},
@@ -60,7 +52,6 @@ int heuristic_cost(const state &current, const state &target){
 }
 
 int a_star(state current, state target, vector<vector<vector<vector<bool>>>> &visited){
-	printS(current);
 	vector<state> next(8, state());
 	priority_queue<state> q;
 	if(!visited[current.digit[0]][current.digit[1]][current.digit[2]][current.digit[3]]){
@@ -89,25 +80,25 @@ int main(){
 	int n = 0, nf = 0;
 	cin >> n;
 	while(n--){
+		vector<vector<vector<vector<bool>>>> visited(10, vector<vector<vector<bool>>>(10, vector<vector<bool>>(10, vector<bool>(10, 0))));
 		state start, target, aux;
 		for(int i = 0; i < 4; i++){
 			cin >> start.digit[i];
 			start.digit[i] -= '0';
 		}
+		start.depth = 0;
 		for(int i = 0; i < 4; i++){
 			cin >> target.digit[i];
 			target.digit[i] -= '0';
 		}
 		cin >> nf;
-		vector<vector<vector<vector<bool>>>> visited(10, vector<vector<vector<bool>>>(10, vector<vector<bool>>(10, vector<bool>(10, 0))));
-		for(int i = 0; i < nf; i++){
-			for(int j = 0; j < 4; j++){
+		while(nf--){
+			for(int i = 0; i < 4; i++){
 				cin >> aux.digit[i];
 				aux.digit[i] -= '0';
 			}
 			visited[aux.digit[0]][aux.digit[1]][aux.digit[2]][aux.digit[3]] = 1;
 		}
-		start.depth = 0;
 		cout << a_star(start, target, visited) << endl;
 	}
 	return 0;
