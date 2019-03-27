@@ -12,12 +12,17 @@ using namespace std;
 typedef int my;
 
 set<vector<vector<my>>> visited;
+int limit = 0;
 
 struct state{
 	vector<vector<my>> board;
 	int depth, f;
+	pair<my, my> x;
 	bool operator<(const state &a) const{
-		return f > a.f;
+		if(depth == a.depth){
+			return f < a.f;
+		}
+		return depth > a.depth;
 	}
 	bool operator==(const state &a) const{
 		for(int i = 0; i < MAX; i++)
@@ -27,9 +32,9 @@ struct state{
 		return 1;
 	}
 	state() :
-		board(vector<vector<my>>(MAX, vector<my>(MAX, 0))), depth(0), f(0) {}
+		board(vector<vector<my>>(MAX, vector<my>(MAX, 0))), depth(0), f(0), x(make_pair(0, 0)) {}
 	state(const state &a) :
-		board(vector<vector<my>>(a.board)), depth(a.depth+1), f(0) {}
+		board(vector<vector<my>>(a.board)), depth(a.depth+1), f(0), x(a.x) {}
 };
 
 //ostream
@@ -62,30 +67,33 @@ ostream &operator<<(ostream &out, const vector<T> &v){
 }
 
 void next_states(const state &current, vector<state> &next){
-	int i = 0, j = 0;
-	for(i = 0; i < MAX; i++){
-		for(j = 0; j < MAX; j++){
-			if(current.board[i][j] == 0) break;
-		}
-		if(current.board[i][j] == 0) break;
-	}
-	cout << current.board << "yo|i" << i << "j" << j << "fuck:" << current.board[i][j] << endl;
+	int i = current.x.first, j = current.x.second;
+	//cout << current.board << "i" << i << "j" << j << "fuck:" << current.board[i][j] << endl;
 	if(i > 0){
 		swap(next[0].board[i][j], next[0].board[i-1][j]);//u
-		cout << next[0].board << "i-1:" << i-1 << "j:" << j << endl;
+		next[0].x = make_pair(i-1, j);
 	}
 	if(j > 0){
 		swap(next[1].board[i][j], next[1].board[i][j-1]);//l
-		cout << next[1].board << "i:" << i << "j-1:" << j-1 << endl;
+		next[1].x = make_pair(i, j-1);
 	}
 	if(j < MAX-1){
 		swap(next[2].board[i][j], next[2].board[i][j+1]);//r
-		cout << next[2].board << "i:" << i << "j+1:" << j+1 << endl;
+		next[2].x = make_pair(i, j+1);
 	}
 	if(i < MAX-1){
 		swap(next[3].board[i][j], next[3].board[i+1][j]);//d
-		cout << next[3].board << "i+1:" << i+1 << "j:" << j << endl;
+		next[3].x = make_pair(i+1, j);
 	}
+}
+
+int inplaces(const state &current, const state &target){
+	int sum = 0;
+	for(int i = 0; i < MAX; i++)
+		for(int j = 0; j < MAX; j++)
+			if(current.board[i][j] == target.board[i][j])
+				sum++;
+	return sum;
 }
 
 int heuristic(const state &current, const state &target){
@@ -99,24 +107,23 @@ int heuristic(const state &current, const state &target){
 	return h + current.depth;
 }
 
-string a_star(state &current, const state &target){
-	if(visited.find(current.board) == visited.end()){//not found
-		visited.insert(current.board);
-		priority_queue<state> q;
-		q.push(current);
-		while(!q.empty()){
-			current = q.top();
-			q.pop();
-			if(current == target)
-				return "ans";//out;
-			vector<state> next(4, state(current));
-			next_states(current, next);
-			for(int i = 0; i < 4; i++){
-				if(visited.find(next[i].board) == visited.end()){
-					visited.insert(next[i].board);
-					next[i].f = heuristic(next[i], target);
-					q.push(next[i]);
-				}
+string a_star(state current, const state &target){
+	visited.insert(current.board);
+	priority_queue<state> q;
+	q.push(current);
+	while(!q.empty() && limit--){
+		current = q.top();
+		q.pop();
+		cout << current.board << limit << endl;
+		if(current == target)
+			return "ans";//out;
+		vector<state> next(4, state(current));
+		next_states(current, next);
+		for(int i = 0; i < 4; i++){
+			if(visited.find(next[i].board) == visited.end()){//not found := not yet visited
+				visited.insert(next[i].board);
+				next[i].f = inplaces(next[i], target);
+				q.push(next[i]);
 			}
 		}
 	}
@@ -129,16 +136,21 @@ int main(){
 	string buffer = "";
 	cin >> n;
 	while(n--){
+		limit = 10004;
 		state start, target;
 		for(int i = 0; i < MAX; i++){
 			for(int j = 0; j < MAX; j++){
-				start.board[i][j] = i*MAX + j;
+				start.board[i][j] = i*MAX + j + 1;
 				cin >> buffer;
 				try{
 					target.board[i][j] = stoi(buffer);
-				}catch(const exception &){}
+				}catch(const exception &){
+					target.x = make_pair(i, j);
+				}
 			}
 		}
+		start.board[MAX-1][MAX-1] = 0;
+		start.x = make_pair(MAX-1, MAX-1);
 		visited.insert(target.board);
 		cout << start.board << endl;
 		cout << target.board << endl;
