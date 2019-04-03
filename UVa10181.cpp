@@ -1,3 +1,7 @@
+//REFERENCES
+//https://amoshyc.github.io/CPsolution/uva/p10181.html
+//https://github.com/secnot/uva-onlinejudge-solutions/blob/master/10181%20-%2015-Puzzle%20Problem/main.c
+
 #include<iostream>
 #include<vector>
 #include<string>
