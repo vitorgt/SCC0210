@@ -69,7 +69,7 @@ int dfs(vector<vector<my>> &board, int limit, int nmoves, char prev_move){
 		return -1;
 
 	//Up
-	if(prev_move != 'D' && x0 != 0){
+	if(prev_move != 'D' && y0 != 0){
 		moveU(board, y0--, x0);
 		moves += 'U';
 		mov = dfs(board, limit, nmoves + 1, 'U');
@@ -79,7 +79,7 @@ int dfs(vector<vector<my>> &board, int limit, int nmoves, char prev_move){
 		moves.pop_back();
 	}
 	//Down
-	if(prev_move != 'U' && x0 != PUZZLE_SIZE-1){
+	if(prev_move != 'U' && y0 != PUZZLE_SIZE-1){
 		moveD(board, y0++, x0);
 		moves += 'D';
 		mov = dfs(board, limit, nmoves + 1, 'D');
@@ -89,7 +89,7 @@ int dfs(vector<vector<my>> &board, int limit, int nmoves, char prev_move){
 		moves.pop_back();
 	}
 	//Left
-	if(prev_move != 'R' && y0 != 0){
+	if(prev_move != 'R' && x0 != 0){
 		moveL(board, y0, x0--);
 		moves += 'L';
 		mov = dfs(board, limit, nmoves + 1, 'L');
@@ -99,7 +99,7 @@ int dfs(vector<vector<my>> &board, int limit, int nmoves, char prev_move){
 		moves.pop_back();
 	}
 	//Right
-	if(prev_move != 'L' && y0 != PUZZLE_SIZE-1){
+	if(prev_move != 'L' && x0 != PUZZLE_SIZE-1){
 		moveR(board, y0, x0++);
 		moves += 'R';
 		mov = dfs(board, limit, nmoves + 1, 'R');
@@ -158,33 +158,4 @@ int main(){
 			cout << moves << endl;
 	}
 	return 0;
-}
-
-/////////////////////////////////////////////////////////////////////
-
-//ostream
-#include<algorithm>
-#include<iterator>
-template<typename T>
-ostream &operator<<(ostream &out, const vector<vector<T>> &v){
-	if(!v.empty()){
-		int i = 0;
-		out << '[';
-		for(; i < PUZZLE_SIZE-1; i++)
-			out << v[i] << ",\n";
-		out << v[i] << "]";
-	}
-	return out;
-}
-template<typename T>
-ostream &operator<<(ostream &out, const vector<T> &v){
-	if(!v.empty()){
-		int i = 0;
-		out << '[';
-		for(; i < PUZZLE_SIZE-1; i++){
-			out << v[i] << ", ";
-		}
-		out << v[i] << "]";
-	}
-	return out;
 }
