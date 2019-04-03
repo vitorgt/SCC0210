@@ -1,41 +1,162 @@
 #include<iostream>
 #include<vector>
 #include<string>
-#include<set>
-#include<queue>
+#include<algorithm>
 
 using namespace std;
 #define inf 0x3f3f3f3f
-#define ll long long
-#define MAX 4
+#define PUZZLE_SIZE 4
 
 typedef int my;
 
-set<vector<vector<my>>> visited;
-int limit = 0;
+string moves = "";
 
-struct state{
-	vector<vector<my>> board;
-	int depth, f;
-	pair<my, my> x;
-	bool operator<(const state &a) const{
-		if(depth == a.depth){
-			return f < a.f;
+pair<my, my> find_zero(const vector<vector<my>> &board){
+	for(int i = 0; i < PUZZLE_SIZE; i++)
+		for(int j = 0; j < PUZZLE_SIZE; j++)
+			if(board[i][j] == 0)
+				return make_pair(i, j);
+	return make_pair(-1, -1);
+}
+
+int H(vector<vector<my>> &board){
+	int h = 0;
+	for(int i = 0; i < PUZZLE_SIZE; i++){
+		for(int j = 0; j < PUZZLE_SIZE; j++){
+			if(board[i][j] == 0) continue;
+			int expect_i = (board[i][j] - 1) / 4;
+			int expect_j = (board[i][j] - 1) % 4;
+			h += abs(expect_i - i) + abs(expect_j - j);
 		}
-		return depth > a.depth;
 	}
-	bool operator==(const state &a) const{
-		for(int i = 0; i < MAX; i++)
-			for(int j = 0; j < MAX; j++)
-				if(board[i][j] != a.board[i][j])
-					return 0;
-		return 1;
+	return h;
+}
+
+bool is_solvable(vector<vector<my>> &board){
+	int cnt = 0, x = 0;
+	vector<bool> occur(PUZZLE_SIZE*PUZZLE_SIZE, 0);
+	vector<bool>::iterator it = occur.begin();
+	for(int i = 0; i < PUZZLE_SIZE; i++){
+		for(int j = 0; j < PUZZLE_SIZE; j++){
+			if(board[i][j] == 0){
+				x = i;
+			}
+			else{
+				cnt += count(it + 1, it + board[i][j], 0);
+				occur[board[i][j]] = 1;
+			}
+		}
 	}
-	state() :
-		board(vector<vector<my>>(MAX, vector<my>(MAX, 0))), depth(0), f(0), x(make_pair(0, 0)) {}
-	state(const state &a) :
-		board(vector<vector<my>>(a.board)), depth(a.depth+1), f(0), x(a.x) {}
-};
+	return (cnt + (x + 1)) % 2 == 0;
+}
+
+void moveU(vector<vector<my>> &board, my y0, my x0){ swap(board[y0][x0], board[y0-1][x0]); }
+void moveD(vector<vector<my>> &board, my y0, my x0){ swap(board[y0][x0], board[y0+1][x0]); }
+void moveL(vector<vector<my>> &board, my y0, my x0){ swap(board[y0][x0], board[y0][x0-1]); }
+void moveR(vector<vector<my>> &board, my y0, my x0){ swap(board[y0][x0], board[y0][x0+1]); }
+
+int dfs(vector<vector<my>> &board, int limit, int nmoves, char prev_move){
+	pair<my, my> zero = find_zero(board);
+	my y0 = zero.first, x0 = zero.second;
+	int h = H(board), mov = 0;
+	if(h == 0)
+		return nmoves;
+	if(h + nmoves + 1 >= limit)
+		return -1;
+
+	//Up
+	if(prev_move != 'D' && x0 != 0){
+		moveU(board, y0--, x0);
+		moves += 'U';
+		mov = dfs(board, limit, nmoves + 1, 'U');
+		if(mov >= 0)
+			return mov;
+		moveD(board, y0++, x0);
+		moves.pop_back();
+	}
+	//Down
+	if(prev_move != 'U' && x0 != PUZZLE_SIZE-1){
+		moveD(board, y0++, x0);
+		moves += 'D';
+		mov = dfs(board, limit, nmoves + 1, 'D');
+		if(mov >= 0)
+			return mov;
+		moveU(board, y0--, x0);
+		moves.pop_back();
+	}
+	//Left
+	if(prev_move != 'R' && y0 != 0){
+		moveL(board, y0, x0--);
+		moves += 'L';
+		mov = dfs(board, limit, nmoves + 1, 'L');
+		if(mov >= 0)
+			return mov;
+		moveR(board, y0, x0++);
+		moves.pop_back();
+	}
+	//Right
+	if(prev_move != 'L' && y0 != PUZZLE_SIZE-1){
+		moveR(board, y0, x0++);
+		moves += 'R';
+		mov = dfs(board, limit, nmoves + 1, 'R');
+		if(mov >= 0)
+			return mov;
+		moveL(board, y0, x0--);
+		moves.pop_back();
+	}
+
+	//Failed
+	return -1;
+}
+
+int solve(vector<vector<my>> &board, int limit){
+	int movs = 0, max_cost = H(board);
+	if(max_cost ==  0)//is solved
+		return 0;
+	if(!is_solvable(board))
+		return -1;
+	while(max_cost <= limit){
+		vector<vector<my>> board_copy(board);
+		movs = dfs(board_copy, max_cost, 0, ' ');
+		if(movs < 0){
+			if(max_cost == limit)
+				break;
+			else
+				max_cost = min(limit, max_cost + 5);
+		}
+		else
+			return movs;
+	}
+	return -1;
+}
+
+int main(){
+	ios::sync_with_stdio(false);
+	int n = 0;
+	string buffer = "";
+	cin >> n;
+	while(n--){
+		vector<vector<my>> board(PUZZLE_SIZE, vector<my>(PUZZLE_SIZE, 0));
+		moves = "";
+		for(int i = 0; i < PUZZLE_SIZE; i++){
+			for(int j = 0; j < PUZZLE_SIZE; j++){
+				cin >> buffer;
+				try{
+					board[i][j] = stoi(buffer);
+				}catch(const exception &){
+					board[i][j] = 0;
+				}
+			}
+		}
+		if(solve(board, 50) < 0)
+			cout << "This puzzle is not solvable.\n";
+		else
+			cout << moves << endl;
+	}
+	return 0;
+}
+
+/////////////////////////////////////////////////////////////////////
 
 //ostream
 #include<algorithm>
@@ -45,7 +166,7 @@ ostream &operator<<(ostream &out, const vector<vector<T>> &v){
 	if(!v.empty()){
 		int i = 0;
 		out << '[';
-		for(; i < MAX-1; i++)
+		for(; i < PUZZLE_SIZE-1; i++)
 			out << v[i] << ",\n";
 		out << v[i] << "]";
 	}
@@ -56,106 +177,10 @@ ostream &operator<<(ostream &out, const vector<T> &v){
 	if(!v.empty()){
 		int i = 0;
 		out << '[';
-		for(; i < MAX-1; i++){
+		for(; i < PUZZLE_SIZE-1; i++){
 			out << v[i] << ", ";
 		}
-		//copy(v.begin(), v.end(), ostream_iterator<T>(out, ", "));
-		//out << "\b\b]";
 		out << v[i] << "]";
 	}
 	return out;
-}
-
-void next_states(const state &current, vector<state> &next){
-	int i = current.x.first, j = current.x.second;
-	//cout << current.board << "i" << i << "j" << j << "fuck:" << current.board[i][j] << endl;
-	if(i > 0){
-		swap(next[0].board[i][j], next[0].board[i-1][j]);//u
-		next[0].x = make_pair(i-1, j);
-	}
-	if(j > 0){
-		swap(next[1].board[i][j], next[1].board[i][j-1]);//l
-		next[1].x = make_pair(i, j-1);
-	}
-	if(j < MAX-1){
-		swap(next[2].board[i][j], next[2].board[i][j+1]);//r
-		next[2].x = make_pair(i, j+1);
-	}
-	if(i < MAX-1){
-		swap(next[3].board[i][j], next[3].board[i+1][j]);//d
-		next[3].x = make_pair(i+1, j);
-	}
-}
-
-int inplaces(const state &current, const state &target){
-	int sum = 0;
-	for(int i = 0; i < MAX; i++)
-		for(int j = 0; j < MAX; j++)
-			if(current.board[i][j] == target.board[i][j])
-				sum++;
-	return sum;
-}
-
-int heuristic(const state &current, const state &target){
-	int d = 0, h = 0;
-	for(int i = 0; i < MAX; i++){
-		for(int j = 0; j < MAX; j++){
-			d = abs(current.board[i][j] - target.board[i][j]);
-			h += min(d, (MAX*MAX)-d);
-		}
-	}
-	return h + current.depth;
-}
-
-string a_star(state current, const state &target){
-	visited.insert(current.board);
-	priority_queue<state> q;
-	q.push(current);
-	while(!q.empty() && limit--){
-		current = q.top();
-		q.pop();
-		cout << current.board << limit << endl;
-		if(current == target)
-			return "ans";//out;
-		vector<state> next(4, state(current));
-		next_states(current, next);
-		for(int i = 0; i < 4; i++){
-			if(visited.find(next[i].board) == visited.end()){//not found := not yet visited
-				visited.insert(next[i].board);
-				next[i].f = inplaces(next[i], target);
-				q.push(next[i]);
-			}
-		}
-	}
-	return "This puzzle is not solvable.";
-}
-
-int main(){
-	ios::sync_with_stdio(false);
-	int n = 0;
-	string buffer = "";
-	cin >> n;
-	while(n--){
-		limit = 10004;
-		state start, target;
-		for(int i = 0; i < MAX; i++){
-			for(int j = 0; j < MAX; j++){
-				start.board[i][j] = i*MAX + j + 1;
-				cin >> buffer;
-				try{
-					target.board[i][j] = stoi(buffer);
-				}catch(const exception &){
-					target.x = make_pair(i, j);
-				}
-			}
-		}
-		start.board[MAX-1][MAX-1] = 0;
-		start.x = make_pair(MAX-1, MAX-1);
-		visited.insert(target.board);
-		cout << start.board << endl;
-		cout << target.board << endl;
-		cout << a_star(start, target) << endl;
-		visited.clear();
-	}
-	return 0;
 }
