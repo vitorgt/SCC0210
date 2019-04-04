@@ -11,7 +11,7 @@ int main(){
 			b = (b << 1) % 131071;
 		else if(a == '1')
 			b = ((b << 1) + 1) % 131071;
-		else{
+		else if(a == '#'){
 			printf(b%131071 ? "NO\n" : "YES\n");
 			b = 0;
 		}
